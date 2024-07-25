@@ -19,12 +19,14 @@ namespace API.Controllers
 			string? token = filterContext.HttpContext.Session.GetString("seassonKey");
 
 			//LICENCIA
-			if (DateTime.Now > new DateTime(2030, 07, 18))
+			if (DateTime.Now > new DateTime(2025, 10, 01))
 			{
-				Authenticate Aut = new Authenticate();
-				Aut.AuthVal = false;
-				Aut.Message = "Licence expired";
-				filterContext.Result = new ObjectResult(Aut) { StatusCode = 403 };
+                Authenticate Aut = new()
+                {
+                    AuthVal = false,
+                    Message = "Licence expired"
+                };
+                filterContext.Result = new ObjectResult(Aut) { StatusCode = 403 };
 			}			
 			if (!AuthNetCore.Authenticate(token))
 			{
