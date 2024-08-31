@@ -6,13 +6,30 @@ namespace API.Controllers
 {
 	public class AuthControllerAttribute : ActionFilterAttribute
 	{
+		private static readonly SemaphoreSlim _semaphore = new SemaphoreSlim(1, 1); // Permite solo una operación concurrente
 		public Permissions[] PermissionsList { get; set; }
 		public AuthControllerAttribute()
 		{
 			PermissionsList = [];
 		}
-		public AuthControllerAttribute(params Permissions[] permissionsList){
+		public AuthControllerAttribute(params Permissions[] permissionsList)
+		{
 			PermissionsList = permissionsList ?? [];
+		}
+		public override async Task OnActionExecutionAsync(ActionExecutingContext context, ActionExecutionDelegate next)
+		{
+			// Intentar entrar al semáforo
+			await _semaphore.WaitAsync();
+			try
+			{
+				// Ejecutar la acción del controlador
+				await next();
+			}
+			finally
+			{
+				// Liberar el semáforo para permitir la siguiente operación
+				_semaphore.Release();
+			}
 		}
 		public override void OnActionExecuting(ActionExecutingContext filterContext)
 		{
@@ -21,13 +38,13 @@ namespace API.Controllers
 			//LICENCIA
 			if (DateTime.Now > new DateTime(2025, 10, 01))
 			{
-                Authenticate Aut = new()
-                {
-                    AuthVal = false,
-                    Message = "Licence expired"
-                };
-                filterContext.Result = new ObjectResult(Aut) { StatusCode = 403 };
-			}			
+				Authenticate Aut = new()
+				{
+					AuthVal = false,
+					Message = "Licence expired"
+				};
+				filterContext.Result = new ObjectResult(Aut) { StatusCode = 403 };
+			}
 			if (!AuthNetCore.Authenticate(token))
 			{
 				Authenticate Aut = new Authenticate
@@ -43,7 +60,7 @@ namespace API.Controllers
 					AuthVal = false,
 					Message = "Inaccessible resource"
 				};
-				filterContext.Result = new ObjectResult(Aut) { StatusCode =  401 };
+				filterContext.Result = new ObjectResult(Aut) { StatusCode = 401 };
 			}
 		}
 	}
@@ -57,7 +74,7 @@ namespace API.Controllers
 				Authenticate Aut = new Authenticate();
 				Aut.AuthVal = false;
 				Aut.Message = "Inaccessible resource";
-				filterContext.Result = new ObjectResult(Aut) { StatusCode =  401 };
+				filterContext.Result = new ObjectResult(Aut) { StatusCode = 401 };
 			}
 		}
 	}
