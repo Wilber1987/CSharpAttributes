@@ -1,4 +1,6 @@
+using BusinessLogic.IA;
 using CAPA_DATOS.Security;
+using CAPA_NEGOCIO.MAPEO;
 using DataBaseModel;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -35,6 +37,25 @@ namespace API.Controllers
         public object? updateTransactional_Configuraciones(Transactional_Configuraciones inst)
         {
             return inst.UpdateConfig(HttpContext.Session.GetString("seassonKey"));
+        }
+        
+        [HttpPost]
+        [AuthController]
+        public object AddToBlackList(Tbl_Case inst)
+        {
+            return BlackListServices.AddUser(inst.Id_Perfil);
+        }
+        [HttpPost]
+        [AuthController]
+        public object RemoveFromBlackList(Tbl_Case inst)
+        {
+            return BlackListServices.RemoveUser(inst.Id_Perfil);
+        }
+        [HttpPost]
+        [AuthController]
+        public object IsInBlackList(Tbl_Case inst)
+        {
+            return BlackListServices.IsInBlackList(inst.Id_Perfil);
         }
     }
 }

@@ -6,7 +6,7 @@ namespace API.Controllers
 {
 	public class AuthControllerAttribute : ActionFilterAttribute
 	{
-		private static readonly SemaphoreSlim _semaphore = new SemaphoreSlim(1, 1); // Permite solo una operación concurrente
+		private static readonly SemaphoreSlim _semaphore = new SemaphoreSlim(20, 20); // Permite solo una operación concurrente
 		public Permissions[] PermissionsList { get; set; }
 		public AuthControllerAttribute()
 		{
