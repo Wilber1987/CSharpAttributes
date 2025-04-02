@@ -1,5 +1,5 @@
 using BusinessLogic.IA;
-using CAPA_DATOS.Security;
+using APPCORE.Security;
 using CAPA_NEGOCIO.MAPEO;
 using DataBaseModel;
 using Microsoft.AspNetCore.Http;
@@ -36,7 +36,7 @@ namespace API.Controllers
         [AuthController(Permissions.ADMIN_ACCESS)]
         public object? updateTransactional_Configuraciones(Transactional_Configuraciones inst)
         {
-            return inst.UpdateConfig(HttpContext.Session.GetString("seassonKey"));
+            return inst.UpdateConfig(HttpContext.Session.GetString("sessionKey"));
         }
         
         [HttpPost]

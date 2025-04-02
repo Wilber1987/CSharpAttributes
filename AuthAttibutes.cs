@@ -1,6 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
-using CAPA_DATOS.Security;
+using APPCORE.Security;
 
 namespace API.Controllers
 {
@@ -23,7 +23,13 @@ namespace API.Controllers
 			try
 			{
 				// Ejecutar la acción del controlador
-				await next();
+				var executedContext = await next();
+				// Si la respuesta es grande, forzar la liberación de memoria
+				if (executedContext.Result is ObjectResult result && result.Value is string responseString && responseString.Length > 1000)
+				{
+					GC.Collect(); // Solo si la respuesta es grande
+					GC.WaitForPendingFinalizers();
+				}
 			}
 			finally
 			{
@@ -33,7 +39,7 @@ namespace API.Controllers
 		}
 		public override void OnActionExecuting(ActionExecutingContext filterContext)
 		{
-			string? token = filterContext.HttpContext.Session.GetString("seassonKey");
+			string? token = filterContext.HttpContext.Session.GetString("sessionKey");
 
 			//LICENCIA
 			if (DateTime.Now > new DateTime(2025, 10, 01))
@@ -69,7 +75,7 @@ namespace API.Controllers
 	{
 		public override void OnActionExecuting(ActionExecutingContext filterContext)
 		{
-			if (!AuthNetCore.HavePermission(Permissions.ADMIN_ACCESS.ToString(), filterContext.HttpContext.Session.GetString("seassonKey")))
+			if (!AuthNetCore.HavePermission(Permissions.ADMIN_ACCESS.ToString(), filterContext.HttpContext.Session.GetString("sessionKey")))
 			{
 				Authenticate Aut = new Authenticate();
 				Aut.AuthVal = false;
