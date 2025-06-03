@@ -36,7 +36,7 @@ namespace UI.CSharpAttributes
             {
                 log.body = $"[{context.Request.Method}] {context.Request.Path} | Mem↑: {diff / 1024} KB | Time: {sw.ElapsedMilliseconds} ms";
                 log.Fecha = DateTime.Now;
-                log.Update(log.body);                
+                log.Update();                
             }
             else
             {
