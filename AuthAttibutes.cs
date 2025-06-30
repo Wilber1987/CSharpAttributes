@@ -6,7 +6,7 @@ namespace API.Controllers
 {
 	public class AuthControllerAttribute : ActionFilterAttribute
 	{
-		private static readonly SemaphoreSlim _semaphore = new SemaphoreSlim(1, 1); // Permite solo una operación concurrente
+		private static readonly SemaphoreSlim _semaphore = new SemaphoreSlim(1000, 1000); // Permite solo una operación concurrente
 		public Permissions[] PermissionsList { get; set; }
 		public AuthControllerAttribute()
 		{
@@ -22,8 +22,76 @@ namespace API.Controllers
 			await _semaphore.WaitAsync();
 			try
 			{
+				string? token = context.HttpContext.Session.GetString("sessionKey");
+
+				// LICENCIA
+				if (DateTime.Now > new DateTime(2025, 10, 01))
+				{
+					context.Result = new ObjectResult(new Authenticate
+					{
+						AuthVal = false,
+						Message = "Licence expired"
+					})
+					{ StatusCode = 403 };
+
+					return; // <- Detiene ejecución
+				}
+				// Autenticación
+				if (!AuthNetCore.Authenticate(token))
+				{
+					context.Result = new ObjectResult(new Authenticate
+					{
+						AuthVal = false
+					});
+					return;
+				}
+				// Permisos
+				if (PermissionsList.Length > 0 && !AuthNetCore.HavePermission(token, PermissionsList))
+				{
+					context.Result = new ObjectResult(new Authenticate
+					{
+						AuthVal = false,
+						Message = "Inaccessible resource"
+					})
+					{ StatusCode = 401 };
+
+					return;
+				}
+
+				// Si pasa todo, continúa con la acción
+				var executedContext = await next();
+				// Forzar recolección si la respuesta es grande
+				if (executedContext.Result is ObjectResult result && result.Value is string responseString)
+				{
+					GC.Collect();
+					GC.WaitForPendingFinalizers();
+				}
+			}
+			finally
+			{
+				_semaphore.Release();
+			}
+		}		
+	}
+
+	public class SemaphoreControllerAttribute : ActionFilterAttribute
+	{
+		private static readonly SemaphoreSlim _semaphore = new SemaphoreSlim(20, 20); // Permite solo una operación concurrente		
+
+		public override async Task OnActionExecutionAsync(ActionExecutingContext context, ActionExecutionDelegate next)
+		{
+			// Intentar entrar al semáforo
+			await _semaphore.WaitAsync();
+			try
+			{
 				// Ejecutar la acción del controlador
-				await next();
+				var executedContext = await next();
+				// Si la respuesta es grande, forzar la liberación de memoria
+				if (executedContext.Result is ObjectResult result && result.Value is string responseString)
+				{
+					GC.Collect(); // Solo si la respuesta es grande
+					GC.WaitForPendingFinalizers();
+				}
 			}
 			finally
 			{
@@ -31,38 +99,7 @@ namespace API.Controllers
 				_semaphore.Release();
 			}
 		}
-		public override void OnActionExecuting(ActionExecutingContext filterContext)
-		{
-			string? token = filterContext.HttpContext.Session.GetString("seassonKey");
 
-			//LICENCIA
-			if (DateTime.Now > new DateTime(2025, 10, 01))
-			{
-				Authenticate Aut = new()
-				{
-					AuthVal = false,
-					Message = "Licence expired"
-				};
-				filterContext.Result = new ObjectResult(Aut) { StatusCode = 403 };
-			}
-			if (!AuthNetCore.Authenticate(token))
-			{
-				Authenticate Aut = new Authenticate
-				{
-					AuthVal = false
-				};
-				filterContext.Result = new ObjectResult(Aut);
-			}
-			if (PermissionsList.Length > 0 && !AuthNetCore.HavePermission(token, PermissionsList))
-			{
-				Authenticate Aut = new Authenticate
-				{
-					AuthVal = false,
-					Message = "Inaccessible resource"
-				};
-				filterContext.Result = new ObjectResult(Aut) { StatusCode = 401 };
-			}
-		}
 	}
 
 	public class AdminAuthAttribute : ActionFilterAttribute
