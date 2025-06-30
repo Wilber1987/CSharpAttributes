@@ -1,5 +1,5 @@
 using API.Controllers;
-using CAPA_DATOS;
+using APPCORE;
 namespace DataBaseModel
 {
 	public class Transactional_Configuraciones : EntityClass
@@ -37,7 +37,7 @@ namespace DataBaseModel
 
 		internal object? UpdateConfig(string? identity)
 		{
-			if (!AuthNetCore.HavePermission(CAPA_DATOS.Security.Permissions.ADMIN_ACCESS.ToString(), identity))
+			if (!AuthNetCore.HavePermission(APPCORE.Security.Permissions.ADMIN_ACCESS.ToString(), identity))
 			{
 				throw new Exception("no tienes permisos para configurar la aplicación");
 			}

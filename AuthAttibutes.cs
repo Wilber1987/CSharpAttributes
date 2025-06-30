@@ -1,6 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
-using CAPA_DATOS.Security;
+using APPCORE.Security;
 
 namespace API.Controllers
 {
@@ -69,7 +69,7 @@ namespace API.Controllers
 	{
 		public override void OnActionExecuting(ActionExecutingContext filterContext)
 		{
-			if (!AuthNetCore.HavePermission(Permissions.ADMIN_ACCESS.ToString(), filterContext.HttpContext.Session.GetString("seassonKey")))
+			if (!AuthNetCore.HavePermission(Permissions.ADMIN_PANEL_ACCESS.ToString(), filterContext.HttpContext.Session.GetString("seassonKey")))
 			{
 				Authenticate Aut = new Authenticate();
 				Aut.AuthVal = false;
