@@ -1,5 +1,6 @@
 using API.Controllers;
 using APPCORE;
+using CAPA_NEGOCIO.SystemConfig;
 namespace DataBaseModel
 {
 	public class Transactional_Configuraciones : EntityClass
@@ -85,9 +86,9 @@ namespace DataBaseModel
 
 	public class Config
 	{
-		public static PageConfig pageConfig()
+		public static SystemConfigImpl SystemConfig()
 		{
-			return new PageConfig();
+			return new SystemConfigImpl();
 		}
 	}
 

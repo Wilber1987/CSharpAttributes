@@ -106,7 +106,7 @@ namespace API.Controllers
 	{
 		public override void OnActionExecuting(ActionExecutingContext filterContext)
 		{
-			if (!AuthNetCore.HavePermission(Permissions.ADMIN_PANEL_ACCESS.ToString(), filterContext.HttpContext.Session.GetString("seassonKey")))
+			if (!AuthNetCore.HavePermission(Permissions.ADMIN_PANEL_ACCESS.ToString(), filterContext.HttpContext.Session.GetString("sessionKey")))
 			{
 				Authenticate Aut = new Authenticate();
 				Aut.AuthVal = false;
