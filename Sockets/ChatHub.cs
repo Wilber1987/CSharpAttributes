@@ -8,9 +8,6 @@ namespace WLLM.Hubs.MensajeriaNotificaciones
 {
     public class ChatHub : Hub
     {
-
-
-
         // Diccionario para mapear userId → ConnectionId
         public static readonly Dictionary<string, string> UserConnectionMap = new();
 
