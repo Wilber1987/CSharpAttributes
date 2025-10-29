@@ -34,7 +34,7 @@ namespace API.Controllers
         [AuthController(Permissions.ADMIN_PANEL_ACCESS)]
         public object? updateTransactional_Configuraciones(Transactional_Configuraciones inst)
         {
-            return inst.UpdateConfig(HttpContext.Session.GetString("seassonKey"));
+            return inst.UpdateConfig(HttpContext.Session.GetString("sessionKey"));
         }
     }
 }

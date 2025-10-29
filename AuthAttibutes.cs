@@ -25,7 +25,7 @@ namespace API.Controllers
 				string? token = context.HttpContext.Session.GetString("sessionKey");
 
 				// LICENCIA
-				if (DateTime.Now > new DateTime(2025, 10, 01))
+				if (DateTime.Now > new DateTime(2030, 10, 01))
 				{
 					context.Result = new ObjectResult(new Authenticate
 					{
